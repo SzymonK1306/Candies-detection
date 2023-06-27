@@ -11,6 +11,7 @@ def extract_digits_regex(string):
 
 candies = 0
 correct_images_number = 0
+abs_error = 0
 
 path = Path(f'{os.getcwd()}')
 file_list = list(path.glob('images/*.png'))
@@ -38,6 +39,30 @@ for file in file_list:
     element_idx = np.where(first_column == image_number)
     element_idx = element_idx[0][0]
 
+    gray = cv2.medianBlur(gray, 25)
+
+    # gray = cv2.GaussianBlur(gray, (17, 17), 0)
+
+    _, gray = cv2.threshold(gray, 203, 255, cv2.THRESH_TOZERO)
+
+    gray = cv2.GaussianBlur(gray, (19, 19), 0)
+
+    gray = cv2.medianBlur(gray, 19)
+
+    _, gray = cv2.threshold(gray, 62, 255, cv2.THRESH_TOZERO)
+
+    # gray = cv2.medianBlur(gray, 25)
+    #
+    # # gray = cv2.GaussianBlur(gray, (17, 17), 0)
+    #
+    # _, gray = cv2.threshold(gray, 203, 255, cv2.THRESH_TOZERO)
+    #
+    # gray = cv2.GaussianBlur(gray, (19, 19), 0)
+    #
+    # gray = cv2.medianBlur(gray, 19)
+    #
+    # _, gray = cv2.threshold(gray, 62, 255, cv2.THRESH_TOZERO)
+
     for roi_element in roi_list:
         # Example of defining ROI coordinates
         roi_x = roi_element[0] # X-coordinate of the top-left corner of ROI
@@ -45,18 +70,32 @@ for file in file_list:
         roi_width = roi_element[2]  # Width of ROI
         roi_height = roi_element[3]  # Height of ROI
 
+
         cv2.rectangle(image, (roi_x, roi_y), (roi_x + roi_width, roi_y + roi_height), (255, 0, 0))
 
         # Extract the ROI from the grayscale image
+        # WORKS
+        # roi = gray[roi_y:roi_y + roi_height, roi_x:roi_x + roi_width]
+        #
+        # _, roi = cv2.threshold(roi, 157, 255, cv2.THRESH_TOZERO)
+        #
+        # roi = cv2.GaussianBlur(roi, (9, 9), 0)
+        #
+        # roi = cv2.medianBlur(roi, 9)
+        #
+        # _, roi = cv2.threshold(roi, 49, 255, cv2.THRESH_TOZERO)
+
         roi = gray[roi_y:roi_y + roi_height, roi_x:roi_x + roi_width]
 
-        _, roi = cv2.threshold(roi, 157, 255, cv2.THRESH_TOZERO)
+        # roi = cv2.medianBlur(roi, 9)
 
-        roi = cv2.GaussianBlur(roi, (9, 9), 0)
-
-        roi = cv2.medianBlur(roi, 9)
-
-        _, roi = cv2.threshold(roi, 49, 255, cv2.THRESH_TOZERO)
+        # _, roi = cv2.threshold(roi, 170, 255, cv2.THRESH_TOZERO)
+        #
+        # roi = cv2.GaussianBlur(roi, (9, 9), 0)
+        #
+        # roi = cv2.medianBlur(roi, 3)
+        #
+        # _, roi = cv2.threshold(roi, 49, 255, cv2.THRESH_TOZERO)
 
         # Perform Hough Circles transformation
         circles = cv2.HoughCircles(roi, cv2.HOUGH_GRADIENT, dp=1, minDist=10, param1=75, param2=20, minRadius=50, maxRadius=65)
@@ -73,10 +112,12 @@ for file in file_list:
         correct_images_number += 1
     else:
         print(file_name, second_column[element_idx], number_of_candies)
+        abs_error += abs(second_column[element_idx] - number_of_candies)
     total_number += number_of_candies
     cv2.imwrite(f'results/{file_name}', image)
 
 print('Total number: ', total_number, correct_images_number)
+print(abs_error)
 # cv2.imshow("Result", image)
 # cv2.waitKey(0)
 # cv2.destroyAllWindows()

@@ -18,8 +18,24 @@ roi_list = [(370, 110, 200, 200), (360, 300, 200, 200), (370, 470, 200, 200), (3
             (910, 320, 200, 200), (960, 480, 200, 200), (1040, 650, 200, 200), (1110, 800, 200, 200),
             (1200, 330, 200, 200), (1280, 480, 200, 200), (1380, 620, 200, 200), (1500, 740, 200, 200)]
 #
-image = cv2.imread('images/image_505.png')
+image = cv2.imread('images/image_335.png')
 gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
+gray = cv2.medianBlur(gray, 25)
+
+# gray = cv2.GaussianBlur(gray, (17, 17), 0)
+
+_, gray = cv2.threshold(gray, 203, 255, cv2.THRESH_TOZERO)
+
+gray = cv2.GaussianBlur(gray, (25, 25), 0)
+
+gray = cv2.medianBlur(gray, 25)
+
+_, gray = cv2.threshold(gray, 55, 255, cv2.THRESH_TOZERO)
+
+
+cv2.imshow('cos', gray)
+cv2.waitKey()
 
 for roi_element in roi_list:
     # Example of defining ROI coordinates
@@ -32,14 +48,22 @@ for roi_element in roi_list:
 
     # Extract the ROI from the grayscale image
     roi = gray[roi_y:roi_y + roi_height, roi_x:roi_x + roi_width]
-
-    _, roi = cv2.threshold(roi, 157, 250, cv2.THRESH_TOZERO)
-
-    roi = cv2.GaussianBlur(roi, (9, 9), 0)
-
-    roi = cv2.medianBlur(roi, 9)
-
-    _, roi = cv2.threshold(roi, 50, 255, cv2.THRESH_TOZERO)
+    #
+    # roi = cv2.GaussianBlur(roi, (21, 21), 0)
+    # #
+    # _, roi = cv2.threshold(roi, 170, 255, cv2.THRESH_TOZERO)
+    # #
+    # roi = cv2.GaussianBlur(roi, (13, 13), 0)
+    #
+    #roi = cv2.medianBlur(roi, 9)
+    #
+    # _, roi = cv2.threshold(roi, 50, 255, cv2.THRESH_TOZERO)
+    #
+    # roi = cv2.GaussianBlur(roi, (3, 3), 0)
+    #
+    # roi = cv2.medianBlur(roi,3)
+    #
+    # _, roi = cv2.threshold(roi, 29, 255, cv2.THRESH_TOZERO)
 
     # roi = cv2.medianBlur(roi, 11)
 
@@ -47,7 +71,7 @@ for roi_element in roi_list:
     # cv2.waitKey(0)
 
     # Perform Hough Circles transformation
-    circles = cv2.HoughCircles(roi, cv2.HOUGH_GRADIENT, dp=1, minDist=30, param1=100, param2=20, minRadius=50,
+    circles = cv2.HoughCircles(roi, cv2.HOUGH_GRADIENT, dp=1, minDist=10, param1=75, param2=20, minRadius=50,
                                maxRadius=65)
 
     # If circles are found, draw them on the original image
